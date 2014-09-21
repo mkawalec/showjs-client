@@ -71,7 +71,7 @@ gulp.task('styles', function () {
 });
 
 gulp.task('watch', function () {
-  gulp.watch(paths.frontend, ['main']);
+  gulp.watch(paths.frontend, ['main-bundle']);
   gulp.watch(paths.styles, ['styles']);
 });
 
