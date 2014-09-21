@@ -2,15 +2,17 @@
 {Stats}        = require './Stats'
 {MasterPassBox}= require './MasterPassBox'
 {helpersMixin} = require './helpersMixin'
+{passMixin} = require './passMixin'
 
 module.exports.SessionManager = React.createClass
-  mixins: [helpersMixin]
+  mixins: [helpersMixin, passMixin]
 
   getInitialState: ->
     return {
       id: @getId()
       stats: {}
       sync_position: {}
+      masterpass: @getPass()
     }
 
   componentWillUnmount: ->
@@ -90,6 +92,7 @@ module.exports.SessionManager = React.createClass
         cb = @propagateSlide
 
       if data.valid == true
+        @savePass pass
         @setState {masterpass: pass, sync: true}, cb
         deferred.resolve true
       else
@@ -115,6 +118,7 @@ module.exports.SessionManager = React.createClass
     @setState {sync: not @state.sync}, cb
 
   releaseMaster: ->
+    @clearPass()
     @setState {masterpass: undefined}
 
   render: ->

@@ -2,20 +2,17 @@
 
 module.exports.MasterPassBox = React.createClass
   getInitialState: ->
-    return {passEnter: false, passEntered: false}
+    return {passEnter: false}
 
   setBtnClicked: ->
     @setState {passEnter: true}
 
   clear: ->
-    console.log 'clr called'
     @refs.pass.getDOMNode().value = ''
 
   setPass: ->
-    console.log 'set called'
     pass = @refs.pass.getDOMNode().value
-    @props.onPassSet(pass).then (=> @setState {passEntered: true}), (->console.log(arguments))
-    true
+    @props.onPassSet(pass).then (->), @clear
 
   keyUp: (e) ->
     if e.which == 13
@@ -41,7 +38,7 @@ module.exports.MasterPassBox = React.createClass
       contents = <Button ontext='Set master password'
                          onClick={@setBtnClicked} />
   
-    if not @state.passEntered
+    if not @props.pass
       (
         <div>
           {contents}
