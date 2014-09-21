@@ -26,22 +26,22 @@ module.exports.SessionManager = React.createClass
     socket.on 'error_msg', (err) ->
       console?.error err
 
+    Reveal.addEventListener 'slidechanged', (e) =>
+      if @state.masterpass
+        payload =
+          pass: @state.masterpass
+          slide: {indexh: e.indexh, indexv: e.indexv}
+          setter: @state.id
+          doc_id: @props.doc_id
+
+        socket.emit 'slide_change', payload
+
     socket.on 'sync', (data) =>
       if @state.sync == undefined
         @setState {sync: true}
 
       if @state.sync != false and data.slide.setter?.id != @state.id
         Reveal.slide data.slide.indexh, data.slide.indexv
-
-      Reveal.addEventListener 'slidechanged', (e) =>
-        if @state.masterpass
-          payload =
-            pass: @state.masterpass
-            slide: {indexh: e.indexh, indexv: e.indexv}
-            setter: @state.id
-            doc_id: @props.doc_id
-
-          socket.emit 'slide_change', payload
 
     socket.on 'stats', (stats) =>
       if @state.sync == undefined
