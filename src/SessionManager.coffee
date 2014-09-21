@@ -1,5 +1,6 @@
 {Button}       = require './components/Button'
 {Stats}        = require './Stats'
+{MasterPassBox}= require './MasterPassBox'
 {helpersMixin} = require './helpersMixin'
 
 module.exports.SessionManager = React.createClass
@@ -17,14 +18,19 @@ module.exports.SessionManager = React.createClass
 
   componentWillMount: ->
     socket = io @props.addr
+    @setState {socket: socket}
+
     socket.on 'connect', =>
       socket.emit 'join_room', {doc_id: @props.doc_id}
+
+    socket.on 'error_msg', (err) ->
+      console?.error err
 
     socket.on 'sync', (data) =>
       if @state.sync == undefined
         @setState {sync: true}
 
-      if data.slide.setter?.id != @state.id
+      if @state.sync != false and data.slide.setter?.id != @state.id
         Reveal.slide data.slide.indexh, data.slide.indexv
 
       Reveal.addEventListener 'slidechanged', (e) =>
@@ -40,19 +46,25 @@ module.exports.SessionManager = React.createClass
     socket.on 'stats', (stats) =>
       if @state.sync == undefined
         @setState {sync: true}
+      console.log 'stats', stats
       @setState {stats: stats}
 
-  setPassword: ->
-    pass = @refs.masterpass.getDOMNode().value
+  setPassword: (pass) ->
+    deferred = Q.defer()
     payload =
       pass: pass
       doc_id: @props.doc_id
 
-    socket.emit 'check_pass', payload, (data) ->
+    @state.socket.emit 'check_pass', payload, (data) =>
+      console.log data
       if data.valid == true
         @setState {masterpass: pass}
+        deferred.resolve true
       else
         @notify 'Invalid password'
+        deferred.reject 'Invalid password'
+
+    return deferred.promise
 
   toggleSync: ->
     1
@@ -64,8 +76,13 @@ module.exports.SessionManager = React.createClass
                 onClick={@toggleSync}
                 classes='sync-btn'
                 ontext='Sync on'
-                offtext='Sync off'/>
+                offtext='Sync off'
+                />
 
         <Stats stats={@state.stats} />
+
+        <MasterPassBox pass={@state.masterpass}
+                       onPassSet={@setPassword}
+                       />
       </div>
     )
