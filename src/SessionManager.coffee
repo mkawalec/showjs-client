@@ -1,11 +1,15 @@
 {Button}       = require './components/Button'
+{Stats}        = require './Stats'
 {helpersMixin} = require './helpersMixin'
 
 module.exports.SessionManager = React.createClass
   mixins: [helpersMixin]
 
   getInitialState: ->
-    return {sync: false, id: @get_id()}
+    return {
+      id: @get_id()
+      stats: {}
+    }
 
   componentWillUnmount: ->
     if @state.stats_handle
@@ -16,9 +20,10 @@ module.exports.SessionManager = React.createClass
     socket.on 'connect', =>
       socket.emit 'join_room', {doc_id: @props.doc_id}
 
-    socket.emit 'sync_me', {doc_id: @props.doc_id}
-
     socket.on 'sync', (data) =>
+      if @state.sync == undefined
+        @setState {sync: true}
+
       if data.slide.setter?.id != @state.id
         Reveal.slide data.slide.indexh, data.slide.indexv
 
@@ -33,7 +38,9 @@ module.exports.SessionManager = React.createClass
           socket.emit 'slide_change', payload
 
     socket.on 'stats', (stats) =>
-      console.log 'got stats', stats
+      if @state.sync == undefined
+        @setState {sync: true}
+      @setState {stats: stats}
 
   setPassword: ->
     pass = @refs.masterpass.getDOMNode().value
@@ -47,7 +54,18 @@ module.exports.SessionManager = React.createClass
       else
         @notify 'Invalid password'
 
+  toggleSync: ->
+    1
+
   render: ->
     (
-      <div/>
+      <div>
+        <Button state={@state.sync}
+                onClick={@toggleSync}
+                classes='sync-btn'
+                ontext='Sync on'
+                offtext='Sync off'/>
+
+        <Stats stats={@state.stats} />
+      </div>
     )
