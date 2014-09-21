@@ -83,7 +83,7 @@ module.exports.SessionManager = React.createClass
 
     @state.socket.emit 'check_pass', payload, (data) =>
       if data.valid == true
-        @setState {masterpass: pass}
+        @setState {masterpass: pass, sync: true}
         deferred.resolve true
       else
         @notify 'Invalid password'
