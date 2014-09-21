@@ -7,13 +7,18 @@ module.exports.SessionManager = React.createClass
   getInitialState: ->
     return {sync: false, id: @get_id()}
 
+  componentWillUnmount: ->
+    if @state.stats_handle
+      clearTimeout @state.stats_handle
+
   componentWillMount: ->
     socket = io @props.addr
-    socket.join @props.doc_id
+    socket.on 'connect', =>
+      socket.emit 'join_room', {doc_id: @props.doc_id}
 
     socket.emit 'sync_me', {doc_id: @props.doc_id}
 
-    socket.on 'sync', (data) ->
+    socket.on 'sync', (data) =>
       if data.slide.setter?.id != @state.id
         Reveal.slide data.slide.indexh, data.slide.indexv
 
@@ -26,6 +31,9 @@ module.exports.SessionManager = React.createClass
             doc_id: @props.doc_id
 
           socket.emit 'slide_change', payload
+
+    socket.on 'stats', (stats) =>
+      console.log 'got stats', stats
 
   setPassword: ->
     pass = @refs.masterpass.getDOMNode().value
