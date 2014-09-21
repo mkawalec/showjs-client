@@ -2,7 +2,7 @@
 
 module.exports.MasterPassBox = React.createClass
   getInitialState: ->
-    return {passEnter: false, visible: true}
+    return {passEnter: false, passEntered: false}
 
   setBtnClicked: ->
     @setState {passEnter: true}
@@ -12,11 +12,15 @@ module.exports.MasterPassBox = React.createClass
 
   setPass: ->
     pass = @refs.pass.getDOMNode().value
-    @props.onPassSet(pass).then (=> @setState {visible: false}), @clear
+    @props.onPassSet(pass).then (=> @setState {passEntered: true}), @clear
 
   keyUp: (e) ->
     if e.which == 13
       @setPass()
+
+  releaseMaster: ->
+    @setState {passEnter: false, passEntered: false}
+    @props.onMasterRelease()
 
   render: ->
     contents = []
@@ -34,11 +38,12 @@ module.exports.MasterPassBox = React.createClass
       contents = <Button ontext='Set master password'
                          onClick={@setBtnClicked} />
   
-    if @state.visible
+    if not @state.passEntered
       (
         <div>
           {contents}
         </div>
       )
     else
-      null
+      <Button ontext='Release master rights'
+              onClick={@releaseMaster} />

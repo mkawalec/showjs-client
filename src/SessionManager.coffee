@@ -100,6 +100,9 @@ module.exports.SessionManager = React.createClass
     # from true to false and vice versa
     @setState {sync: not @state.sync}, cb
 
+  releaseMaster: ->
+    @setState {masterpass: undefined}
+
   render: ->
     (
       <div>
@@ -114,6 +117,7 @@ module.exports.SessionManager = React.createClass
 
         <MasterPassBox pass={@state.masterpass}
                        onPassSet={@setPassword}
+                       onMasterRelease={@releaseMaster}
                        />
       </div>
     )
