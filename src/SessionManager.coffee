@@ -16,6 +16,22 @@ module.exports.SessionManager = React.createClass
     if @state.stats_handle
       clearTimeout @state.stats_handle
 
+  propagateSlide: (e) ->
+    if @state.masterpass and @state.sync
+      if e
+        slide = {indexh: e.indexh, indexv: e.indexv}
+      else
+        {h, v} = Reveal.getIndices()
+        slide = {indexh: h, indexv: v}
+
+      payload =
+        pass: @state.masterpass
+        slide: slide
+        setter: @state.id
+        doc_id: @props.doc_id
+
+      @state.socket.emit 'slide_change', payload
+
   componentWillMount: ->
     socket = io @props.addr
     @setState {socket: socket}
@@ -25,22 +41,14 @@ module.exports.SessionManager = React.createClass
 
     socket.on 'error_msg', @notify
 
-    Reveal.addEventListener 'slidechanged', (e) =>
-      if @state.masterpass
-        payload =
-          pass: @state.masterpass
-          slide: {indexh: e.indexh, indexv: e.indexv}
-          setter: @state.id
-          doc_id: @props.doc_id
-
-        socket.emit 'slide_change', payload
+    Reveal.addEventListener 'slidechanged', @propagateSlide
 
     socket.on 'sync', (data) =>
       if @state.sync == undefined
         @setState {sync: true}
 
       {h, v} = Reveal.getIndices()
-      if @state.sync != false and data.slide.setter?.id != @state.id and \
+      if @state.sync and data.slide.setter?.id != @state.id and \
          (h != data.slide.indexh or v != data.slide.indexv)
         Reveal.slide data.slide.indexh, data.slide.indexv
 
@@ -66,7 +74,13 @@ module.exports.SessionManager = React.createClass
     return deferred.promise
 
   toggleSync: ->
-    1
+    # The callback will be called with a new state
+    if not @state.sync
+      cb = @propagateSlide
+    else
+      cb = ( -> )
+
+    @setState {sync: not @state.sync}, cb
 
   render: ->
     (

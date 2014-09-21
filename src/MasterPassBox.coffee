@@ -21,7 +21,12 @@ module.exports.MasterPassBox = React.createClass
   render: ->
     contents = []
     if @state.passEnter
-      contents.push <input type='text' ref='pass' onKeyUp={@keyUp} />
+      contents.push <input type='password'
+                           ref='pass'
+                           onKeyUp={@keyUp}
+                           autoFocus
+                           />
+
       contents.push <Button ontext='Submit'
                           onClick={@setPass}
                           />
