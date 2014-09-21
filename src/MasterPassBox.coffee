@@ -14,10 +14,14 @@ module.exports.MasterPassBox = React.createClass
     pass = @refs.pass.getDOMNode().value
     @props.onPassSet(pass).then (=> @setState {visible: false}), @clear
 
+  keyUp: (e) ->
+    if e.which == 13
+      @setPass()
+
   render: ->
     contents = []
     if @state.passEnter
-      contents.push <input type='text' ref='pass' />
+      contents.push <input type='text' ref='pass' onKeyUp={@keyUp} />
       contents.push <Button ontext='Submit'
                           onClick={@setPass}
                           />

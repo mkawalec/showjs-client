@@ -23,8 +23,7 @@ module.exports.SessionManager = React.createClass
     socket.on 'connect', =>
       socket.emit 'join_room', {doc_id: @props.doc_id}
 
-    socket.on 'error_msg', (err) ->
-      console?.error err
+    socket.on 'error_msg', @notify
 
     Reveal.addEventListener 'slidechanged', (e) =>
       if @state.masterpass
@@ -48,7 +47,6 @@ module.exports.SessionManager = React.createClass
     socket.on 'stats', (stats) =>
       if @state.sync == undefined
         @setState {sync: true}
-      console.log 'stats', stats
       @setState {stats: stats}
 
   setPassword: (pass) ->
@@ -58,7 +56,6 @@ module.exports.SessionManager = React.createClass
       doc_id: @props.doc_id
 
     @state.socket.emit 'check_pass', payload, (data) =>
-      console.log data
       if data.valid == true
         @setState {masterpass: pass}
         deferred.resolve true

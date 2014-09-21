@@ -7,6 +7,5 @@ module.exports.helpersMixin =
       acc
     ), ''
 
-  notify: ->
-    true
+  notify: console.log
 
