@@ -35,28 +35,34 @@ gulp.task('main', ['translate'], function () {
     .pipe(gulp.dest('static/'));
 });
 
-gulp.task('main-bundle', ['main', 'bower'], function () {
+gulp.task('concat-libs', ['bower'], function () {
   return gulp.src(['components/lodash/dist/lodash.min.js', 
                   'components/q/q.js', 
                   'components/q-xhr/q-xhr.js',
                   'components/react/react.js',
-                  'components/socket.io-client/socket.io.js',
-                  'static/show.js'])
+                  'components/socket.io-client/socket.io.js'])
+             .pipe(concat('libs.js'))
+             .pipe(gulp.dest('static'));
+});
+
+gulp.task('compress-libs', ['concat-libs'], function () {
+  return gulp.src(['static/libs.js'])
+             .pipe(uglify())
+             .pipe(rename('libs.min.js'))
+             .pipe(gulp.dest('static'));
+});
+
+gulp.task('main-bundle', ['main', 'bower'], function () {
+  return gulp.src(['static/libs.js', 
+                   'static/show.standalone.js'])
              .pipe(concat('show.bundle.js'))
              .pipe(gulp.dest('static'));
 });
 
-gulp.task('compress', ['main'], function () {
-  return gulp.src('static/show.js')
-    .pipe(uglify())
-    .pipe(rename('show.min.js'))
-    .pipe(gulp.dest('static/'));
-});
 
-gulp.task('compress-bundle', ['main-bundle', 'bower'], function () {
-  return gulp.src('static/show.bundle.js')
-    .pipe(uglify())
-    .pipe(rename('show.js'))
+gulp.task('compress-bundle', ['main', 'compress-libs'], function () {
+  return gulp.src(['static/libs.min.js', 'static/show.standalone.js'])
+    .pipe(concat('show.js'))
     .pipe(gulp.dest('static/'));
 });
 
