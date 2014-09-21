@@ -23,6 +23,8 @@ module.exports.SessionManager = React.createClass
       if e
         slide = {indexh: e.indexh, indexv: e.indexv}
       else
+        # Figure out the coords manually
+        {h, v} = Reveal.getIndices()
         slide = {indexh: h, indexv: v}
 
       payload =
