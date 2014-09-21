@@ -6,6 +6,7 @@ var gulp       = require('gulp'),
     browserify = require('gulp-browserify'),
     rename     = require('gulp-rename'),
     uglify     = require('gulp-uglify'),
+    bower      = require('gulp-bower'),
     del        = require('del');
 
 var paths = {
@@ -15,6 +16,10 @@ var paths = {
 
 gulp.task('clean', function (cb) {
   del(['build'], cb);
+});
+
+gulp.task('bower', function () {
+  return bower().pipe(gulp.dest('components/'));
 });
 
 // Compiles coffee to js
@@ -33,7 +38,7 @@ gulp.task('main', ['translate'], function () {
     .pipe(gulp.dest('static/'));
 });
 
-gulp.task('main-bundle', ['main'], function () {
+gulp.task('main-bundle', ['main', 'bower'], function () {
   return gulp.src(['components/lodash/dist/lodash.min.js', 
                   'components/q/q.js', 
                   'components/q-xhr/q-xhr.js',
@@ -51,7 +56,7 @@ gulp.task('compress', ['main'], function () {
     .pipe(gulp.dest('static/'));
 });
 
-gulp.task('compress-bundle', ['main-bundle'], function () {
+gulp.task('compress-bundle', ['main-bundle', 'bower'], function () {
   return gulp.src('static/show.bundle.js')
     .pipe(uglify())
     .pipe(rename('show.bundle.min.js'))
