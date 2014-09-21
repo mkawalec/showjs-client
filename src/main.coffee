@@ -5,7 +5,7 @@ window.ShowJS = (doc_id, opts={}) ->
     if not doc_id?
       throw {type: 'MissingErr', msg: 'Doc id is missing'}
 
-    addr = opts.addr ? 'http://showjs.io:80'
+    addr = opts.addr ? 'https://showjs.io:443'
 
     if opts.debug == true
       addr = 'http://localhost:55555'
