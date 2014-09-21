@@ -1,7 +1,7 @@
 {SessionManager} = require './SessionManager'
 
 window.ShowJS = (doc_id, opts={}) ->
-  window.addEventListener 'DOMContentLoaded', ->
+  mount = ->
     if not doc_id?
       throw {type: 'MissingErr', msg: 'Doc id is missing'}
 
@@ -19,3 +19,8 @@ window.ShowJS = (doc_id, opts={}) ->
       <SessionManager addr={addr} doc_id={doc_id}/>
       wrapper
     )
+
+  if document.querySelector 'body'
+    mount()
+  else
+    window.addEventListener 'DOMContentLoaded', mount

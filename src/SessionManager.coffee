@@ -93,6 +93,11 @@ module.exports.SessionManager = React.createClass
     # The callback will be called with a new state
     if not @state.sync
       cb = @propagateSlide
+
+      {h, v} = Reveal.getIndices()
+      sync = @state.sync_position
+      if not @state.masterpass and (h != sync.indexh or v != sync.indexv)
+        Reveal.slide sync.indexh, sync.indexv
     else
       cb = ( -> )
 
