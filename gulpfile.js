@@ -1,7 +1,6 @@
 var gulp       = require('gulp'),
     cjsx       = require('gulp-cjsx'),
     concat     = require('gulp-concat'),
-    sourcemaps = require('gulp-sourcemaps'),
     less       = require('gulp-less'),
     browserify = require('gulp-browserify'),
     rename     = require('gulp-rename'),
@@ -25,16 +24,14 @@ gulp.task('bower', function () {
 // Compiles coffee to js
 gulp.task('translate', ['clean'], function () {
   return gulp.src(paths.frontend)
-    .pipe(sourcemaps.init())
     .pipe(cjsx({bare: true}))
-    .pipe(sourcemaps.write())
     .pipe(gulp.dest('build/'));
 });
 
 gulp.task('main', ['translate'], function () {
   return gulp.src('build/main.js')
     .pipe(browserify())
-    .pipe(rename('show.js'))
+    .pipe(rename('show.standalone.js'))
     .pipe(gulp.dest('static/'));
 });
 
@@ -59,7 +56,7 @@ gulp.task('compress', ['main'], function () {
 gulp.task('compress-bundle', ['main-bundle', 'bower'], function () {
   return gulp.src('static/show.bundle.js')
     .pipe(uglify())
-    .pipe(rename('show.bundle.min.js'))
+    .pipe(rename('show.js'))
     .pipe(gulp.dest('static/'));
 });
 
