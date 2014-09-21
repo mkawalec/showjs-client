@@ -40,7 +40,9 @@ module.exports.SessionManager = React.createClass
       if @state.sync == undefined
         @setState {sync: true}
 
-      if @state.sync != false and data.slide.setter?.id != @state.id
+      {h, v} = Reveal.getIndices()
+      if @state.sync != false and data.slide.setter?.id != @state.id and \
+         (h != data.slide.indexh or v != data.slide.indexv)
         Reveal.slide data.slide.indexh, data.slide.indexv
 
     socket.on 'stats', (stats) =>
