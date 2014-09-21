@@ -1,4 +1,4 @@
-client
-======
+Show.js client
+==============
 
-The client side of showjs
+Synchronised presentations for the masses!
