@@ -18,7 +18,8 @@ module.exports.SessionManager = React.createClass
       clearTimeout @state.stats_handle
 
   propagateSlide: (e) ->
-    # Fired every time the slide is changed
+    # Tells the other clients that they have to
+    # update the current slide
     if @state.masterpass and @state.sync
       if e
         slide = {indexh: e.indexh, indexv: e.indexv}
@@ -76,14 +77,20 @@ module.exports.SessionManager = React.createClass
       @setState {stats: stats}
 
   setPassword: (pass) ->
+    # Fired when master password is set
     deferred = Q.defer()
     payload =
       pass: pass
       doc_id: @props.doc_id
 
     @state.socket.emit 'check_pass', payload, (data) =>
+      if @state.sync
+        cb = ( -> )
+      else
+        cb = @propagateSlide
+
       if data.valid == true
-        @setState {masterpass: pass, sync: true}
+        @setState {masterpass: pass, sync: true}, cb
         deferred.resolve true
       else
         @notify 'Invalid password'
