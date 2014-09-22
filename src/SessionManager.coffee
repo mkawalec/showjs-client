@@ -1,8 +1,9 @@
-{Button}       = require './components/Button'
-{Stats}        = require './Stats'
-{MasterPassBox}= require './MasterPassBox'
-{helpersMixin} = require './helpersMixin'
-{passMixin} = require './passMixin'
+{Button}          = require './components/Button'
+{Stats}           = require './Stats'
+{MasterPassBox}   = require './MasterPassBox'
+{helpersMixin}    = require './helpersMixin'
+{passMixin}       = require './passMixin'
+{ThrottledSource} = require './ThrottledSource'
 
 module.exports.SessionManager = React.createClass
   mixins: [helpersMixin, passMixin]
@@ -52,7 +53,8 @@ module.exports.SessionManager = React.createClass
 
   componentWillMount: ->
     socket = io @props.addr
-    @setState {socket: socket}
+    source = new ThrottledSource(socket)
+    @setState {socket: socket, source: source}
 
     socket.on 'connect', =>
       socket.emit 'join_room', {doc_id: @props.doc_id}
@@ -60,7 +62,7 @@ module.exports.SessionManager = React.createClass
     socket.on 'error_msg', @notify
     Reveal.addEventListener 'slidechanged', @propagateSlide
 
-    socket.on 'sync', (data) =>
+    source.on 'sync', (data) =>
       if @state.sync == undefined
         @setState {sync: true}
 
