@@ -1,6 +1,13 @@
 {SessionManager} = require './SessionManager'
+{DraggableAnchor} = require './DraggableAnchor'
 
 window.ShowJS = (doc_id, opts={}) ->
+  createWrapper = (classes) ->
+    wrapper = document.createElement 'div'
+    wrapper.className = classes
+    document.querySelector('body').appendChild wrapper
+    wrapper
+
   mount = ->
     if not doc_id?
       throw {type: 'MissingErr', msg: 'Doc id is missing'}
@@ -11,13 +18,15 @@ window.ShowJS = (doc_id, opts={}) ->
       addr = 'http://localhost:55555'
 
     # Init the wrapper
-    wrapper = document.createElement 'div'
-    wrapper.className = 'showjs-wrapper'
-    document.querySelector('body').appendChild wrapper
 
     React.renderComponent(
       <SessionManager addr={addr} doc_id={doc_id}/>
-      wrapper
+      createWrapper('showjs-wrapper')
+    )
+
+    React.renderComponent(
+      <DraggableAnchor />
+      createWrapper('showjs-anchor')
     )
 
   if document.querySelector 'body'
