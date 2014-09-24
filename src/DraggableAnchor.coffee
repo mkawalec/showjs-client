@@ -6,7 +6,6 @@ module.exports.DraggableAnchor = React.createClass
     @interceptor.className = 'showjs-interceptor'
 
   mouseDown: (e) ->
-    console.log 'down fired', e
     @start = {}
     @stick_to = 'left'
     @node = @getDOMNode()
