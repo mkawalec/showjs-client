@@ -39,7 +39,7 @@ gulp.task('concat-libs', ['bower'], function () {
   return gulp.src(['components/lodash/dist/lodash.min.js', 
                   'components/q/q.js', 
                   'components/q-xhr/q-xhr.js',
-                  'components/react/react.js',
+                  'components/react/react-with-addons.js',
                   'components/socket.io-client/socket.io.js'])
              .pipe(concat('libs.js'))
              .pipe(gulp.dest('static'));
@@ -52,7 +52,7 @@ gulp.task('compress-libs', ['concat-libs'], function () {
              .pipe(gulp.dest('static'));
 });
 
-gulp.task('main-bundle', ['main', 'bower'], function () {
+gulp.task('main-bundle', ['main', 'bower', 'concat-libs'], function () {
   return gulp.src(['static/libs.js', 
                    'static/show.standalone.js'])
              .pipe(concat('show.bundle.js'))

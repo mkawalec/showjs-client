@@ -14,11 +14,20 @@ module.exports.SessionManager = React.createClass
       stats: {}
       sync_position: {}
       masterpass: @getPass()
+      visibility_state: false
     }
 
   componentWillUnmount: ->
     if @state.stats_handle
       clearTimeout @state.stats_handle
+
+    document.removeEventListener 'click', @toggleVisibility
+
+  last_click: 0
+  toggleVisibility: ->
+    if _.now() - @last_click < 300
+      @setState {visibility_state: !@state.visibility_state}
+    @last_click = _.now()
 
   propagateSlide: (e) ->
     # Tells the other clients that they have to
@@ -52,6 +61,10 @@ module.exports.SessionManager = React.createClass
         @setState {sync: false}
 
   componentWillMount: ->
+    # Set the double click handler
+    document.addEventListener 'click', @toggleVisibility
+
+    # Set the data source
     socket = io @props.addr
     source = new ThrottledSource(socket)
     @setState {socket: socket, source: source}
@@ -124,8 +137,13 @@ module.exports.SessionManager = React.createClass
     @setState {masterpass: undefined}
 
   render: ->
+    classes = React.addons.classSet
+      visible: @state.visibility_state
+      hidden: !@state.visibility_state
+      showjs: true
+
     (
-      <div>
+      <div className={classes}>
         <Button state={@state.sync}
                 onClick={@toggleSync}
                 classes='sync-btn'
