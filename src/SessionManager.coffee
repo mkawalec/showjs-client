@@ -25,7 +25,7 @@ module.exports.SessionManager = React.createClass
 
   last_click: 0
   toggleVisibility: ->
-    if _.now() - @last_click < 300
+    if _.now() - @last_click < 200
       @setState {visibility_state: !@state.visibility_state}
     @last_click = _.now()
 
