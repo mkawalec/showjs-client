@@ -6,6 +6,7 @@ module.exports.DraggableAnchor = React.createClass
     @interceptor.className = 'showjs-interceptor'
 
   mouseDown: (e) ->
+    console.log 'down fired', e
     @start = {}
     @stick_to = 'left'
     @node = @getDOMNode()
@@ -13,10 +14,9 @@ module.exports.DraggableAnchor = React.createClass
     document.querySelector('body').appendChild @interceptor
 
     @interceptor.addEventListener 'mousemove', @move
-    @interceptor.addEventListener 'touchmove', @move
     @node.addEventListener 'mousemove', @move
-    @node.addEventListener 'touchmove', @move
 
+    document.addEventListener 'touchmove', @move
     document.addEventListener 'mouseup', @mouseUp
     document.addEventListener 'touchend', @mouseUp
 
@@ -25,7 +25,7 @@ module.exports.DraggableAnchor = React.createClass
     document.querySelector('body').removeChild @interceptor
 
     @node.removeEventListener 'mousemove', @move
-    @node.removeEventListener 'touchmove', @move
+    document.removeEventListener 'touchmove', @move
     document.removeEventListener 'mouseup', @mouseUp
     document.removeEventListener 'touchend', @mouseUp
 
@@ -49,14 +49,17 @@ module.exports.DraggableAnchor = React.createClass
 
   move: (e) ->
     e.stopPropagation()
-    # TODO: These are broken:D
-    @start.left ?= e.x - @node.offsetLeft
-    @start.top ?= e.y - @node.offsetTop
+
+    {x, y} = e
+    x ?= e.touches[0].clientX
+    y ?= e.touches[0].clientY
+    @start.left ?= x - @node.offsetLeft
+    @start.top ?= y - @node.offsetTop
 
     if @node.offsetLeft == 0 and @node.offsetTop == 0
       # Top-left corner
 
-      if e.x - @start.left > e.y - @start.top
+      if x - @start.left > y - @start.top
         @stick_to = 'top'
       else
         @stick_to = 'left'
@@ -64,7 +67,7 @@ module.exports.DraggableAnchor = React.createClass
         @node.offsetTop == 0
       # Top-right corner
 
-      if @node.offsetLeft + @start.left - e.x > e.y - @start.top
+      if @node.offsetLeft + @start.left - x > y - @start.top
         @stick_to = 'top'
       else
         @stick_to = 'right'
@@ -72,7 +75,7 @@ module.exports.DraggableAnchor = React.createClass
         @node.offsetTop + @node.offsetHeight >= window.innerHeight
       # Bottom-right corner
 
-      if @node.offsetLeft + @start.left - e.x > @node.offsetTop + @start.top - e.y
+      if @node.offsetLeft + @start.left - x > @node.offsetTop + @start.top - y
         @stick_to = 'bottom'
       else
         @stick_to = 'right'
@@ -80,12 +83,12 @@ module.exports.DraggableAnchor = React.createClass
         @node.offsetTop + @node.offsetHeight >= window.innerHeight
       # Bottom-left corner
 
-      if @node.offsetTop + @start.top - e.y > e.x - @start.left
+      if @node.offsetTop + @start.top - y > x - @start.left
         @stick_to = 'left'
       else
         @stick_to = 'bottom'
 
-    @setCoord e.x - @start.left, e.y - @start.top
+    @setCoord x - @start.left, y - @start.top
 
   render: ->
     (
