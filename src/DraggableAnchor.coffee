@@ -1,15 +1,33 @@
 module.exports.DraggableAnchor = React.createClass
+  componentWillMount: ->
+    # Create a div that will cover the whole page, 
+    # so that we can intercept mousemove for everything
+    @interceptor = document.createElement 'div'
+    @interceptor.className = 'showjs-interceptor'
+
   mouseDown: (e) ->
     @start = {}
     @stick_to = 'left'
     @node = @getDOMNode()
 
-    document.addEventListener 'mousemove', @move
+    document.querySelector('body').appendChild @interceptor
+
+    @interceptor.addEventListener 'mousemove', @move
+    @interceptor.addEventListener 'touchmove', @move
+    @node.addEventListener 'mousemove', @move
+    @node.addEventListener 'touchmove', @move
+
     document.addEventListener 'mouseup', @mouseUp
+    document.addEventListener 'touchend', @mouseUp
 
   mouseUp: ->
-    document.removeEventListener 'mousemove', @move
+    @interceptor.removeEventListener 'mousemove', @move
+    document.querySelector('body').removeChild @interceptor
+
+    @node.removeEventListener 'mousemove', @move
+    @node.removeEventListener 'touchmove', @move
     document.removeEventListener 'mouseup', @mouseUp
+    document.removeEventListener 'touchend', @mouseUp
 
   nonNegative: (val) -> if val < 0 then 0 else val
 
@@ -72,7 +90,7 @@ module.exports.DraggableAnchor = React.createClass
   render: ->
     (
       <div className='draggable-anchor'>
-        <div className='indicator' onMouseDown={@mouseDown} />
+        <div className='indicator' onMouseDown={@mouseDown} onTouchStart={@mouseDown}/>
         <div className='container'/>
       </div>
     )

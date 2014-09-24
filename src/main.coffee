@@ -18,6 +18,7 @@ window.ShowJS = (doc_id, opts={}) ->
       addr = 'http://localhost:55555'
 
     # Init the wrapper
+    React.initializeTouchEvents true
 
     React.renderComponent(
       <SessionManager addr={addr} doc_id={doc_id}/>
