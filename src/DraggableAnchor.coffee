@@ -1,23 +1,19 @@
 module.exports.DraggableAnchor = React.createClass
-  move_cb: ( -> )
-
   mouseDown: (e) ->
     @start = {}
     @stick_to = 'left'
     @node = @getDOMNode()
 
-    @move_cb = _.throttle @move, 50
-    document.addEventListener 'mousemove', @move_cb
+    document.addEventListener 'mousemove', @move
     document.addEventListener 'mouseup', @mouseUp
 
   mouseUp: ->
-    document.removeEventListener 'mousemove', @move_cb
+    document.removeEventListener 'mousemove', @move
     document.removeEventListener 'mouseup', @mouseUp
 
   nonNegative: (val) -> if val < 0 then 0 else val
 
-  setCoord: (e) ->
-    {x, y} = e
+  setCoord: (x, y) ->
     if x + @node.offsetWidth > window.innerWidth
       x = window.innerWidth - @node.offsetWidth
     if y + @node.offsetHeight > window.innerHeight
@@ -35,8 +31,9 @@ module.exports.DraggableAnchor = React.createClass
 
   move: (e) ->
     e.stopPropagation()
-    @start.left ?= e.x
-    @start.top ?= e.y
+    # TODO: These are broken:D
+    @start.left ?= e.x - @node.offsetLeft
+    @start.top ?= e.y - @node.offsetTop
 
     if @node.offsetLeft == 0 and @node.offsetTop == 0
       # Top-left corner
@@ -49,7 +46,7 @@ module.exports.DraggableAnchor = React.createClass
         @node.offsetTop == 0
       # Top-right corner
 
-      if window.innerWidth - e.x - @start.left > e.y - @start.top
+      if @node.offsetLeft + @start.left - e.x > e.y - @start.top
         @stick_to = 'top'
       else
         @stick_to = 'right'
@@ -57,7 +54,7 @@ module.exports.DraggableAnchor = React.createClass
         @node.offsetTop + @node.offsetHeight >= window.innerHeight
       # Bottom-right corner
 
-      if window.innerWidth - e.x - @start.left > window.innerHeight - e.y - @start.top
+      if @node.offsetLeft + @start.left - e.x > @node.offsetTop + @start.top - e.y
         @stick_to = 'bottom'
       else
         @stick_to = 'right'
@@ -65,12 +62,12 @@ module.exports.DraggableAnchor = React.createClass
         @node.offsetTop + @node.offsetHeight >= window.innerHeight
       # Bottom-left corner
 
-      if window.innerHeight - e.y - @start.top > e.x - @start.left
+      if @node.offsetTop + @start.top - e.y > e.x - @start.left
         @stick_to = 'left'
       else
         @stick_to = 'bottom'
 
-    @setCoord e
+    @setCoord e.x - @start.left, e.y - @start.top
 
   render: ->
     (
