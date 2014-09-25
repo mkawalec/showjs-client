@@ -10,3 +10,17 @@ module.exports.helpersMixin =
   notify: (msg) ->
     console.log msg
 
+  parseAttr: (str) ->
+    split = _.filter str.split(';'), (val) -> val.indexOf(':') != -1
+    _.reduce split, ((acc, property_string) ->
+      [prop, value] = property_string.split ':'
+      acc[prop] = value
+      acc
+    ), {}
+
+  indicatorPos: ->
+    indicator = document.querySelector('.progress span')
+    width = @parseAttr(indicator.getAttribute('style'))['width']
+    width = parseFloat width
+    width / window.innerWidth
+

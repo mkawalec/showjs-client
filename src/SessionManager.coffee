@@ -1,9 +1,9 @@
-{Button}          = require './components/Button'
-{Stats}           = require './Stats'
-{MasterPassBox}   = require './MasterPassBox'
-{helpersMixin}    = require './helpersMixin'
-{passMixin}       = require './passMixin'
-{ThrottledSource} = require './ThrottledSource'
+{Button}            = require './components/Button'
+{Stats}             = require './Stats'
+{MasterPassBox}     = require './MasterPassBox'
+{helpersMixin}      = require './helpersMixin'
+{passMixin}         = require './passMixin'
+{ThrottledSource}   = require './ThrottledSource'
 
 module.exports.SessionManager = React.createClass
   mixins: [helpersMixin, passMixin]
@@ -40,6 +40,10 @@ module.exports.SessionManager = React.createClass
         {h, v} = Reveal.getIndices()
         slide = {indexh: h, indexv: v}
 
+      # Get the position of the master indicator 
+      # in fraction of full window width
+      slide.indicator_pos = @indicatorPos()
+
       payload =
         pass: @state.masterpass
         slide: slide
@@ -51,14 +55,32 @@ module.exports.SessionManager = React.createClass
     @checkSync @state.sync_position
 
   checkSync: (pos) ->
-      {h, v} = Reveal.getIndices()
+    {h, v} = Reveal.getIndices()
 
-      # If we are again in sync, change the sync state to true
-      if not @state.sync and pos.indexh == h and pos.indexv == v
-          @setState {sync: true}
-      if @state.sync and not @state.masterpass and \
-          (pos.indexh != h or pos.indexv != v)
-        @setState {sync: false}
+    # If we are again in sync, change the sync state to true
+    if not @state.sync and pos.indexh == h and pos.indexv == v
+      @setState {sync: true}
+      @props.dispatch.emit 'indicator.hide'
+    if @state.sync and not @state.masterpass and \
+        (pos.indexh != h or pos.indexv != v)
+      @setState {sync: false}
+      @props.dispatch.emit 'indicator.show'
+
+  onSync: (data) ->
+    if @state.sync == undefined
+      @setState {sync: true}
+
+    @setState {sync_position: data.slide}
+    @props.dispatch.emit 'indicator.change', data.slide.indicator_pos
+
+    {h, v} = Reveal.getIndices()
+
+    if @state.sync and data.slide.setter?.id != @state.id and \
+       (h != data.slide.indexh or v != data.slide.indexv)
+      Reveal.slide data.slide.indexh, data.slide.indexv
+
+    @checkSync data.slide
+
 
   componentWillMount: ->
     # Set the double click handler
@@ -75,18 +97,7 @@ module.exports.SessionManager = React.createClass
     socket.on 'error_msg', @notify
     Reveal.addEventListener 'slidechanged', @propagateSlide
 
-    source.on 'sync', (data) =>
-      if @state.sync == undefined
-        @setState {sync: true}
-
-      @setState {sync_position: data.slide}
-      {h, v} = Reveal.getIndices()
-
-      if @state.sync and data.slide.setter?.id != @state.id and \
-         (h != data.slide.indexh or v != data.slide.indexv)
-        Reveal.slide data.slide.indexh, data.slide.indexv
-
-      @checkSync data.slide
+    source.on 'sync', @onSync
 
     socket.on 'stats', (stats) =>
       if @state.sync == undefined
@@ -119,14 +130,18 @@ module.exports.SessionManager = React.createClass
   toggleSync: ->
     # The callback will be called with a new state
     if not @state.sync
+      # The sync will be toggled on
       cb = @propagateSlide
+      @props.dispatch.emit 'indicator.hide'
 
       {h, v} = Reveal.getIndices()
       sync = @state.sync_position
       if not @state.masterpass and (h != sync.indexh or v != sync.indexv)
         Reveal.slide sync.indexh, sync.indexv
     else
+      # The sync will be toggled off
       cb = ( -> )
+      @props.dispatch.emit 'indicator.show'
 
     # Negate the sync state, so toggle 
     # from true to false and vice versa
@@ -157,5 +172,6 @@ module.exports.SessionManager = React.createClass
                        onPassSet={@setPassword}
                        onMasterRelease={@releaseMaster}
                        />
+
       </div>
     )
