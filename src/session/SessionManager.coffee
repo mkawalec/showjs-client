@@ -1,4 +1,4 @@
-{Button}            = require './components/Button'
+{Button}            = require '../components/Button'
 {Stats}             = require './Stats'
 {MasterPassBox}     = require './MasterPassBox'
 {helpersMixin}      = require './helpersMixin'

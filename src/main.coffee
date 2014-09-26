@@ -1,8 +1,8 @@
-{SessionManager}    = require './SessionManager'
-{Dispatch}          = require './Dispatch'
-{PositionIndicator} = require './PositionIndicator'
-{Comments}          = require './Comments'
-{ThrottledSource}   = require './ThrottledSource'
+{SessionManager}    = require './session/SessionManager'
+{Comments}          = require './comments/Comments'
+{Dispatch}          = require './utils/Dispatch'
+{PositionIndicator} = require './utils/PositionIndicator'
+{ThrottledSource}   = require './utils/ThrottledSource'
 
 
 window.ShowJS = (doc_id, opts={}) ->

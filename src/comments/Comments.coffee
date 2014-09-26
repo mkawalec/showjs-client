@@ -21,10 +21,15 @@ module.exports.Comments = React.createClass
       acc
     ), {add: false, nodes: []}).nodes
 
+  find_offset: (node, offset) ->
+    offset
+    # Here we need an implementation of KMP :D
+
   markNodes: (node, range, type, start_range=0, end_range) ->
     if type == 'mark_whole'
       contents  = node.innerHTML
       end_range ?= contents.length
+      start_offset = @find_offset(node, start_range)
 
       before = contents.substr(0, start_range)
       toWrap = contents.substr(start_range, end_range)
@@ -48,19 +53,27 @@ module.exports.Comments = React.createClass
     else if type == 'end'
       end_node = range.endContainer.parentElement
       if node == end_node
-        console.log 'marking', range
         @markNodes node, range, 'mark_whole', 0, range.endOffset
       else
         _.reduce node.children, (end_reached, child) =>
           if not end_reached and child.contains(end_node)
-            console.log 'end', child
             @markNodes child, range, 'end'
             end_reached = true
           else if not end_reached
-            console.log 'before', child
             @markNodes child, range, 'mark_whole'
           end_reached
         , false
+
+  # In order to remove the selection, we need to traverse 
+  # the tree again in the same fashion, this time unpacking
+  # the values from the wrappers
+  # We get the innerHTML of the wrapper and do replaceChild 
+  # (thank you DOM API <3)
+  #
+  # We also need to deal with the parts of the node that are not
+  # inside other children. I propose to wrap these inside a span, 
+  # if the node has any children, and they will not be missed when
+  # iterating the children.
 
 
   addComment: ->

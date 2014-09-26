@@ -1,4 +1,4 @@
-{Button} = require './components/Button'
+{Button} = require '../components/Button'
 
 module.exports.MasterPassBox = React.createClass
   getInitialState: ->
