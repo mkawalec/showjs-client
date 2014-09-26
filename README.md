@@ -6,6 +6,7 @@ Synchronised presentations for the masses!
 
 A rough plan from future features:
 
+- [x] An indicator showing the current position
 - [ ] Ability to add comments to the slide at a given position (saved in localStore)
 - [ ] Comments can be added to a range
 - [ ] Comments can be sent to everyone / everyone but master
