@@ -21,13 +21,32 @@ module.exports.SessionManager = React.createClass
     if @state.stats_handle
       clearTimeout @state.stats_handle
 
-    document.removeEventListener 'click', @toggleVisibility
+    document.removeEventListener 'dblclick', @toggleVisibility
 
-  last_click: 0
+  componentWillMount: ->
+    # Set the double click handler
+    document.addEventListener 'dblclick', @toggleVisibility
+
+    # Set the data source
+    socket = io @props.addr
+    source = new ThrottledSource(socket)
+    @setState {socket: socket, source: source}
+
+    socket.on 'connect', =>
+      socket.emit 'join_room', {doc_id: @props.doc_id}
+
+    socket.on 'error_msg', @notify
+    Reveal.addEventListener 'slidechanged', @propagateSlide
+
+    source.on 'sync', @onSync
+
+    socket.on 'stats', (stats) =>
+      if @state.sync == undefined
+        @setState {sync: true}
+      @setState {stats: stats}
+
   toggleVisibility: ->
-    if _.now() - @last_click < 200
-      @setState {visibility_state: !@state.visibility_state}
-    @last_click = _.now()
+    @setState {visibility_state: !@state.visibility_state}
 
   propagateSlide: (e) ->
     # Tells the other clients that they have to
@@ -81,28 +100,6 @@ module.exports.SessionManager = React.createClass
 
     @checkSync data.slide
 
-
-  componentWillMount: ->
-    # Set the double click handler
-    document.addEventListener 'click', @toggleVisibility
-
-    # Set the data source
-    socket = io @props.addr
-    source = new ThrottledSource(socket)
-    @setState {socket: socket, source: source}
-
-    socket.on 'connect', =>
-      socket.emit 'join_room', {doc_id: @props.doc_id}
-
-    socket.on 'error_msg', @notify
-    Reveal.addEventListener 'slidechanged', @propagateSlide
-
-    source.on 'sync', @onSync
-
-    socket.on 'stats', (stats) =>
-      if @state.sync == undefined
-        @setState {sync: true}
-      @setState {stats: stats}
 
   setPassword: (pass) ->
     # Fired when master password is set
