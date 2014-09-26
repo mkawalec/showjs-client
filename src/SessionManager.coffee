@@ -3,7 +3,6 @@
 {MasterPassBox}     = require './MasterPassBox'
 {helpersMixin}      = require './helpersMixin'
 {passMixin}         = require './passMixin'
-{ThrottledSource}   = require './ThrottledSource'
 
 module.exports.SessionManager = React.createClass
   mixins: [helpersMixin, passMixin]
@@ -27,20 +26,15 @@ module.exports.SessionManager = React.createClass
     # Set the double click handler
     document.addEventListener 'dblclick', @toggleVisibility
 
-    # Set the data source
-    socket = io @props.addr
-    source = new ThrottledSource(socket)
-    @setState {socket: socket, source: source}
+    @props.socket.on 'connect', =>
+      @props.socket.emit 'join_room', {doc_id: @props.doc_id}
 
-    socket.on 'connect', =>
-      socket.emit 'join_room', {doc_id: @props.doc_id}
-
-    socket.on 'error_msg', @notify
+    @props.socket.on 'error_msg', @notify
     Reveal.addEventListener 'slidechanged', @propagateSlide
 
-    source.on 'sync', @onSync
+    @props.source.on 'sync', @onSync
 
-    socket.on 'stats', (stats) =>
+    @props.socket.on 'stats', (stats) =>
       if @state.sync == undefined
         @setState {sync: true}
       @setState {stats: stats}
@@ -69,7 +63,7 @@ module.exports.SessionManager = React.createClass
         setter: @state.id
         doc_id: @props.doc_id
 
-      @state.socket.emit 'slide_change', payload
+      @props.socket.emit 'slide_change', payload
 
     @checkSync @state.sync_position
 
@@ -108,7 +102,7 @@ module.exports.SessionManager = React.createClass
       pass: pass
       doc_id: @props.doc_id
 
-    @state.socket.emit 'check_pass', payload, (data) =>
+    @props.socket.emit 'check_pass', payload, (data) =>
       if @state.sync
         cb = ( -> )
       else

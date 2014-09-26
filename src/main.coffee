@@ -1,6 +1,8 @@
 {SessionManager}    = require './SessionManager'
 {Dispatch}          = require './Dispatch'
 {PositionIndicator} = require './PositionIndicator'
+{Comments}          = require './Comments'
+{ThrottledSource}   = require './ThrottledSource'
 
 
 window.ShowJS = (doc_id, opts={}) ->
@@ -20,20 +22,28 @@ window.ShowJS = (doc_id, opts={}) ->
     if opts.debug == true
       addr = 'http://localhost:55555'
 
-    # Init the wrappers
-    wrapper = addNode 'showjs-wrapper'
-    indicator_wrapper = addNode 'showjs-indicator'
-
     dispatch = new Dispatch()
+    socket = io addr
+    data_source = new ThrottledSource(socket)
 
     React.renderComponent(
-      <SessionManager addr={addr} doc_id={doc_id} dispatch={dispatch}/>
-      wrapper
+      <SessionManager addr={addr}
+                      doc_id={doc_id}
+                      dispatch={dispatch}
+                      socket={socket}
+                      source={data_source}
+                      />
+      addNode('showjs-wrapper')
     )
 
     React.renderComponent(
       <PositionIndicator dispatch={dispatch}/>
-      indicator_wrapper
+      addNode('showjs-indicator')
+    )
+
+    React.renderComponent(
+      <Comments/>
+      addNode('showjs-comments')
     )
 
   if document.querySelector 'body'
