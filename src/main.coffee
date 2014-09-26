@@ -30,7 +30,10 @@ window.ShowJS = (doc_id, opts={}) ->
       <SessionManager addr={addr}
                       doc_id={doc_id}
                       dispatch={dispatch}
+                      # Socket is the raw SocketIO socket
                       socket={socket}
+                      # Source is the Throttled source, that is the
+                      # preferred thing to use in your programs
                       source={data_source}
                       />
       addNode('showjs-wrapper')
@@ -42,7 +45,7 @@ window.ShowJS = (doc_id, opts={}) ->
     )
 
     React.renderComponent(
-      <Comments/>
+      <Comments source={data_source}/>
       addNode('showjs-comments')
     )
 

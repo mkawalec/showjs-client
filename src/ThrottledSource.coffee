@@ -15,7 +15,7 @@ module.exports.ThrottledSource = (socket) ->
       clearTimeout data.timeout
       delete throttle_store[event]
 
-  @emit = -> socket.emit
+  @emit = socket.emit
     
   emit = (event, params...) ->
     # A simple emit loop
