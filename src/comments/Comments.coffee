@@ -22,6 +22,9 @@ module.exports.Comments = React.createClass
     ), {add: false, nodes: []}).nodes
 
   find_offset: (node, offset) ->
+    # remove the tags, but keep in mind how many characters are removed - this a double match,
+    # first checking the length of the stuff to remove and then removing it.
+    # note that only the tags need to be removed, their contents stay the same
     offset
     # Here we need an implementation of KMP :D
 
