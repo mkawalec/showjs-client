@@ -1,4 +1,5 @@
 {ShowJS} = require './ShowJS'
+React    = require 'react'
 
 
 window.ShowJS = (doc_id, opts={}) ->

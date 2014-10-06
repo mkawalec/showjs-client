@@ -39,8 +39,6 @@ gulp.task('concat-libs', ['bower'], function () {
   return gulp.src(['components/lodash/dist/lodash.min.js', 
                   'components/q/q.js', 
                   'components/q-xhr/q-xhr.js',
-                  'components/react/react-with-addons.js',
-                  'components/react-cursor/dist/react-cursor.dev.js',
                   'components/socket.io-client/socket.io.js'])
              .pipe(concat('libs.js'))
              .pipe(gulp.dest('static'));

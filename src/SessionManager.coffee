@@ -5,6 +5,10 @@
 {passMixin}         = require './passMixin'
 {ThrottledSource}   = require './ThrottledSource'
 
+React  = require 'react'
+addons = require 'react-addons'
+
+
 module.exports.SessionManager = React.createClass
   mixins: [helpersMixin, passMixin]
 
@@ -79,18 +83,18 @@ module.exports.SessionManager = React.createClass
     # If we are again in sync, change the sync state to true
     if not @state.sync and pos.indexh == h and pos.indexv == v
       @setState {sync: true}
-      @props.onIndicatorToggle 'hide'
+      @props.indicatorCursor.refine('visible').set false
     if @state.sync and not @state.masterpass and \
         (pos.indexh != h or pos.indexv != v)
       @setState {sync: false}
-      @props.onIndicatorToggle 'show'
+      @props.indicatorCursor.refine('visible').set true
 
   onSync: (data) ->
     if @state.sync == undefined
       @setState {sync: true}
 
     @setState {sync_position: data.slide}
-    @props.onIndicatorChange data.slide.indicator_pos
+    @props.indicatorCursor.refine('position').set data.slide.indicator_pos
 
     {h, v} = Reveal.getIndices()
 
@@ -129,7 +133,7 @@ module.exports.SessionManager = React.createClass
     if not @state.sync
       # The sync will be toggled on
       cb = @propagateSlide
-      @props.onIndicatorToggle 'hide'
+      @props.indicatorCursor.refine('visible').set false
 
       {h, v} = Reveal.getIndices()
       sync = @state.sync_position
@@ -138,7 +142,7 @@ module.exports.SessionManager = React.createClass
     else
       # The sync will be toggled off
       cb = ( -> )
-      @props.onIndicatorToggle 'show'
+      @props.indicatorCursor.refine('visible').set true
 
     # Negate the sync state, so toggle 
     # from true to false and vice versa
@@ -149,7 +153,7 @@ module.exports.SessionManager = React.createClass
     @setState {masterpass: undefined}
 
   render: ->
-    classes = React.addons.classSet
+    classes = addons.classSet
       visible: @state.visibility_state
       hidden: !@state.visibility_state
       'showjs-settings': true
