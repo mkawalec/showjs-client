@@ -1,26 +1,30 @@
 {SessionManager}    = require './SessionManager'
 {PositionIndicator} = require './PositionIndicator'
-{Cursor}            = require 'react-cursor'
-React               = require 'react'
+{helpersMixin}      = require './helpersMixin'
+{passMixin}         = require './passMixin'
+
+{Cursor} = require 'react-cursor'
+React    = require 'react'
 
 
 module.exports.ShowJS = React.createClass
+  mixins: [helpersMixin, passMixin]
+
   getInitialState: ->
+
     {
       indicator: {
         visible: false
         position: 0
       }
+      session: {
+        id: @getId()
+        stats: {}
+        sync_position: {}
+        masterpass: @getPass()
+        visibility: false
+      }
     }
-
-  toggleIndicatorState: (state) ->
-    if state == 'hide'
-      @setState {indicatorVisible: false}
-    else if state == 'show'
-      @setState {indicatorVisible: true}
-
-  propagateIndicator: (position) ->
-    @setState {indicatorPosition: position}
 
   render: ->
     cursor = Cursor.build @
@@ -28,11 +32,11 @@ module.exports.ShowJS = React.createClass
 
     (
       <div className='showjs'>
-        <SessionManager addr={@props.addr}
-                        doc_id={@props.doc_id}
-                        onIndicatorToggle={@toggleIndicatorState}
-                        onIndicatorChange={@propagateIndicator}
+        <SessionManager doc_id={@props.doc_id}
+                        socket={@props.socket}
+                        source={@props.source}
                         indicatorCursor={indicatorCursor}
+                        cursor={cursor.refine('session')}
                         />
 
         <PositionIndicator visible={indicatorCursor.refine('visible')}

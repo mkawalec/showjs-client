@@ -3,7 +3,6 @@
 {MasterPassBox}     = require './MasterPassBox'
 {helpersMixin}      = require './helpersMixin'
 {passMixin}         = require './passMixin'
-{ThrottledSource}   = require './ThrottledSource'
 
 React  = require 'react'
 addons = require 'react-addons'
@@ -12,19 +11,7 @@ addons = require 'react-addons'
 module.exports.SessionManager = React.createClass
   mixins: [helpersMixin, passMixin]
 
-  getInitialState: ->
-    return {
-      id: @getId()
-      stats: {}
-      sync_position: {}
-      masterpass: @getPass()
-      visibility_state: false
-    }
-
   componentWillUnmount: ->
-    if @state.stats_handle
-      clearTimeout @state.stats_handle
-
     document.removeEventListener 'dblclick', @toggleVisibility
 
   componentWillMount: ->
@@ -32,30 +19,28 @@ module.exports.SessionManager = React.createClass
     document.addEventListener 'dblclick', @toggleVisibility
 
     # Set the data source
-    socket = io @props.addr
-    source = new ThrottledSource(socket)
-    @setState {socket: socket, source: source}
+    @props.socket.on 'connect', =>
+      @props.socket.emit 'join_room', {doc_id: @props.doc_id}
 
-    socket.on 'connect', =>
-      socket.emit 'join_room', {doc_id: @props.doc_id}
-
-    socket.on 'error_msg', @notify
+    @props.socket.on 'error_msg', @notify
     Reveal.addEventListener 'slidechanged', @propagateSlide
 
-    source.on 'sync', @onSync
+    @props.source.on 'sync', @onSync
 
-    socket.on 'stats', (stats) =>
-      if @state.sync == undefined
-        @setState {sync: true}
-      @setState {stats: stats}
+    @props.socket.on 'stats', (stats) =>
+      if @props.cursor.refine('sync').value == undefined
+        @props.cursor.refine('sync').set true
+
+      @props.cursor.refine('stats').set stats
 
   toggleVisibility: ->
-    @setState {visibility_state: !@state.visibility_state}
+    visibility = @props.cursor.refine('visibility')
+    visibility.set !visibility.pendingValue()
 
   propagateSlide: (e) ->
     # Tells the other clients that they have to
     # update the current slide
-    if @state.masterpass and @state.sync
+    if @props.cursor.refine('masterpass').value and @props.cursor.refine('sync').value
       if e
         slide = {indexh: e.indexh, indexv: e.indexv}
       else
@@ -68,37 +53,42 @@ module.exports.SessionManager = React.createClass
       slide.indicator_pos = @indicatorPos()
 
       payload =
-        pass: @state.masterpass
+        pass: @props.cursor.refine('masterpass').value
         slide: slide
-        setter: @state.id
+        setter: @props.cursor.refine('id').value
         doc_id: @props.doc_id
 
-      @state.socket.emit 'slide_change', payload
+      @props.socket.emit 'slide_change', payload
 
-    @checkSync @state.sync_position
+    @checkSync @props.cursor.refine('sync_position').value
 
   checkSync: (pos) ->
     {h, v} = Reveal.getIndices()
 
-    # If we are again in sync, change the sync state to true
-    if not @state.sync and pos.indexh == h and pos.indexv == v
-      @setState {sync: true}
-      @props.indicatorCursor.refine('visible').set false
-    if @state.sync and not @state.masterpass and \
+    sync    = @props.cursor.refine('sync')
+    visible = @props.indicatorCursor.refine('visible')
+
+    if not sync.value and pos.indexh == h and pos.indexv == v
+      sync.set true
+      visible.set false
+
+    if sync.value and not @props.cursor.refine('masterpass').value and \
         (pos.indexh != h or pos.indexv != v)
-      @setState {sync: false}
-      @props.indicatorCursor.refine('visible').set true
+
+      sync.set false
+      visible.set true
 
   onSync: (data) ->
-    if @state.sync == undefined
-      @setState {sync: true}
+    sync = @props.cursor.refine('sync')
+    if sync.value == undefined
+      sync.set true
 
-    @setState {sync_position: data.slide}
+    @props.cursor.refine('sync_position').set data.slide
     @props.indicatorCursor.refine('position').set data.slide.indicator_pos
 
     {h, v} = Reveal.getIndices()
 
-    if @state.sync and data.slide.setter?.id != @state.id and \
+    if sync.value and data.slide.setter?.id != @props.cursor.refine('id').value and \
        (h != data.slide.indexh or v != data.slide.indexv)
       Reveal.slide data.slide.indexh, data.slide.indexv
 
@@ -112,15 +102,18 @@ module.exports.SessionManager = React.createClass
       pass: pass
       doc_id: @props.doc_id
 
-    @state.socket.emit 'check_pass', payload, (data) =>
-      if @state.sync
+    @props.socket.emit 'check_pass', payload, (data) =>
+      if @props.cursor.refine('sync').value
         cb = ( -> )
       else
         cb = @propagateSlide
 
       if data.valid == true
         @savePass pass
-        @setState {masterpass: pass, sync: true}, cb
+        @props.cursor.refine('masterpass').set pass
+        @props.cursor.refine('sync').set true
+        cb()
+
         deferred.resolve true
       else
         @notify 'Invalid password'
@@ -129,47 +122,53 @@ module.exports.SessionManager = React.createClass
     return deferred.promise
 
   toggleSync: ->
-    # The callback will be called with a new state
-    if not @state.sync
+    console.log(@props.cursor.refine('sync').pendingValue())
+    if not @props.cursor.refine('sync').pendingValue()
       # The sync will be toggled on
       cb = @propagateSlide
+      console.log 'setting invisible'
       @props.indicatorCursor.refine('visible').set false
 
       {h, v} = Reveal.getIndices()
-      sync = @state.sync_position
-      if not @state.masterpass and (h != sync.indexh or v != sync.indexv)
+      sync = @props.cursor.refine('sync_position').value
+      if not @props.cursor.refine('masterpass').value and \
+          (h != sync.indexh or v != sync.indexv)
         Reveal.slide sync.indexh, sync.indexv
     else
       # The sync will be toggled off
       cb = ( -> )
+      console.log 'setting visible'
       @props.indicatorCursor.refine('visible').set true
 
     # Negate the sync state, so toggle 
     # from true to false and vice versa
-    @setState {sync: not @state.sync}, cb
+    sync = @props.cursor.refine('sync')
+    sync.set !sync.pendingValue
+    cb()
 
   releaseMaster: ->
     @clearPass()
-    @setState {masterpass: undefined}
+    @props.cursor.refine('masterpass').set undefined
 
   render: ->
+    visibility = @props.cursor.refine('visibility').value
     classes = addons.classSet
-      visible: @state.visibility_state
-      hidden: !@state.visibility_state
+      visible: visibility
+      hidden: !visibility
       'showjs-settings': true
 
     (
       <div className={classes}>
-        <Button state={@state.sync}
+        <Button state={@props.cursor.refine('sync').value}
                 onClick={@toggleSync}
                 classes='sync-btn'
                 ontext='Sync on'
                 offtext='Sync off'
                 />
 
-        <Stats stats={@state.stats} />
+        <Stats stats={@props.cursor.refine('stats').value} />
 
-        <MasterPassBox pass={@state.masterpass}
+        <MasterPassBox pass={@props.cursor.refine('masterpass').value}
                        onPassSet={@setPassword}
                        onMasterRelease={@releaseMaster}
                        />

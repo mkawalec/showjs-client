@@ -1,5 +1,6 @@
-{ShowJS} = require './ShowJS'
-React    = require 'react'
+{ShowJS}          = require './ShowJS'
+React             = require 'react'
+{ThrottledSource} = require './ThrottledSource'
 
 
 window.ShowJS = (doc_id, opts={}) ->
@@ -20,9 +21,14 @@ window.ShowJS = (doc_id, opts={}) ->
 
     # Init the wrappers
     wrapper = addNode 'showjs-wrapper'
+    socket = io addr
+    source = new ThrottledSource(socket)
 
     React.renderComponent(
-      <ShowJS addr={addr} doc_id={doc_id} />
+      <ShowJS doc_id={doc_id}
+              socket={socket}
+              source={source}
+              />
       wrapper
     )
 
