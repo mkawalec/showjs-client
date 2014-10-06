@@ -1,6 +1,4 @@
-{SessionManager}    = require './SessionManager'
-{Dispatch}          = require './Dispatch'
-{PositionIndicator} = require './PositionIndicator'
+{ShowJS} = require './ShowJS'
 
 
 window.ShowJS = (doc_id, opts={}) ->
@@ -9,7 +7,6 @@ window.ShowJS = (doc_id, opts={}) ->
     wrapper.className = className
     document.querySelector('body').appendChild wrapper
     wrapper
-
 
   mount = ->
     if not doc_id?
@@ -22,18 +19,10 @@ window.ShowJS = (doc_id, opts={}) ->
 
     # Init the wrappers
     wrapper = addNode 'showjs-wrapper'
-    indicator_wrapper = addNode 'showjs-indicator'
-
-    dispatch = new Dispatch()
 
     React.renderComponent(
-      <SessionManager addr={addr} doc_id={doc_id} dispatch={dispatch}/>
+      <ShowJS addr={addr} doc_id={doc_id} />
       wrapper
-    )
-
-    React.renderComponent(
-      <PositionIndicator dispatch={dispatch}/>
-      indicator_wrapper
     )
 
   if document.querySelector 'body'
