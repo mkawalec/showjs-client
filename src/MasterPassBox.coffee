@@ -2,11 +2,8 @@
 React    = require 'react'
 
 module.exports.MasterPassBox = React.createClass
-  getInitialState: ->
-    return {passEnter: false}
-
   setBtnClicked: ->
-    @setState {passEnter: true}
+    @props.cursor.refine('inputVisible').set true
 
   clear: ->
     @refs.pass.getDOMNode().value = ''
@@ -20,12 +17,13 @@ module.exports.MasterPassBox = React.createClass
       @setPass()
 
   releaseMaster: ->
-    @setState {passEnter: false, passEntered: false}
+    @props.cursor.refine('inputVisible').set false
+    @props.cursor.refine('passEntered').set false
     @props.onMasterRelease()
 
   render: ->
     contents = []
-    if @state.passEnter
+    if @props.cursor.refine('inputVisible').value
       contents.push <input type='password'
                            ref='pass'
                            onKeyUp={@keyUp}
@@ -39,7 +37,9 @@ module.exports.MasterPassBox = React.createClass
       contents = <Button ontext='Set master password'
                          onClick={@setBtnClicked} />
   
-    if not @props.pass
+    # Actually place the contents on the page. Or don't
+    # if the password was already entered
+    if not @props.cursor.refine('masterpass').value
       (
         <div>
           {contents}
