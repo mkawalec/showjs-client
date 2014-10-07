@@ -1,17 +1,19 @@
 {SessionManager}    = require './session/SessionManager'
 {Comments}          = require './comments/Comments'
-{Dispatch}          = require './utils/Dispatch'
 {PositionIndicator} = require './utils/PositionIndicator'
 {ThrottledSource}   = require './utils/ThrottledSource'
+
+{ShowJS}          = require './ShowJS'
+React             = require 'react'
 
 
 window.ShowJS = (doc_id, opts={}) ->
   addNode = (className) ->
+    # Adds a node with a given class
     wrapper = document.createElement 'div'
     wrapper.className = className
     document.querySelector('body').appendChild wrapper
     wrapper
-
 
   mount = ->
     if not doc_id?
@@ -22,31 +24,17 @@ window.ShowJS = (doc_id, opts={}) ->
     if opts.debug == true
       addr = 'http://localhost:55555'
 
-    dispatch = new Dispatch()
+    # Init the wrappers
+    wrapper = addNode 'showjs-wrapper'
     socket = io addr
-    data_source = new ThrottledSource(socket)
+    source = new ThrottledSource(socket)
 
     React.renderComponent(
-      <SessionManager addr={addr}
-                      doc_id={doc_id}
-                      dispatch={dispatch}
-                      # Socket is the raw SocketIO socket
-                      socket={socket}
-                      # Source is the Throttled source, that is the
-                      # preferred thing to use in your programs
-                      source={data_source}
-                      />
-      addNode('showjs-wrapper')
-    )
-
-    React.renderComponent(
-      <PositionIndicator dispatch={dispatch}/>
-      addNode('showjs-indicator')
-    )
-
-    React.renderComponent(
-      <Comments source={data_source}/>
-      addNode('showjs-comments')
+      <ShowJS doc_id={doc_id}
+              socket={socket}
+              source={source}
+              />
+      wrapper
     )
 
   if document.querySelector 'body'

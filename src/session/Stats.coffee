@@ -1,3 +1,5 @@
+React = require 'react'
+
 module.exports.Stats = React.createClass
   render: ->
     (

@@ -1,3 +1,5 @@
+React = require 'react'
+
 module.exports.Button = React.createClass
   render: ->
     classes = 'btn '

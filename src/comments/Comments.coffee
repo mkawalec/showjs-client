@@ -1,3 +1,6 @@
+React = require 'react'
+
+
 module.exports.Comments = React.createClass
   componentDidMount: ->
     document.addEventListener 'mouseup', @addComment
