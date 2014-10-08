@@ -1,15 +1,15 @@
 var gulp       = require('gulp'),
-    cjsx       = require('gulp-cjsx'),
     concat     = require('gulp-concat'),
     less       = require('gulp-less'),
     browserify = require('gulp-browserify'),
     rename     = require('gulp-rename'),
     uglify     = require('gulp-uglify'),
     bower      = require('gulp-bower'),
+    gulpLiveScript= require('gulp-livescript'),
     del        = require('del');
 
 var paths = {
-  frontend: ['src/**/*.coffee'],
+  frontend: ['src/**/*.ls'],
   styles: ['src/**/*.less']
 };
 
@@ -24,7 +24,7 @@ gulp.task('bower', function () {
 // Compiles coffee to js
 gulp.task('translate', ['clean'], function () {
   return gulp.src(paths.frontend)
-    .pipe(cjsx({bare: true}))
+    .pipe(gulpLiveScript({bare: true}))
     .pipe(gulp.dest('build/'));
 });
 
