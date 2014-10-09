@@ -6,4 +6,4 @@ module.exports.Stats = React.create-class do
   render: ->
     div null,
       div null, "Total clients: #{@props.stats.total}"
-      div null, "Clients on this document: #{props.stats.this_document}"
+      div null, "Clients on this document: #{@props.stats.this_document}"

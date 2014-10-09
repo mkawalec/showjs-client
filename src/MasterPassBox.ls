@@ -6,7 +6,7 @@ React    = require 'react/addons'
 module.exports.Master-pass-box = React.create-class do
 
   set-btn-clicked: ->
-    @props.cursor.refine \input-visible .set true
+    @props.cursor.refine \inputVisible .set true
 
   set-pass: ->
     # Sets the password, and clears the password field,
@@ -23,14 +23,14 @@ module.exports.Master-pass-box = React.create-class do
 
   # Called to remove master rights from the current client
   release-master: ->
-    @props.cursor.refine \input-visible .set false
-    @props.cursor.refine \pass-entered .set false
+    @props.cursor.refine \inputVisible .set false
+    @props.cursor.refine \passEntered .set false
     @props.on-master-release!
 
   render: ->
-    if not @props.cursor.refine \masterpass .value?
+    if not @props.cursor.refine \masterpass .value
       div null, do
-        if @props.cursor.refine \inputVisible .value?
+        if @props.cursor.refine \inputVisible .value
           * input {type: \password, ref: \pass, on-key-up: @key-up, autoFocus: true}
             Button {ontext: \Submit, on-click: @set-pass}
         else

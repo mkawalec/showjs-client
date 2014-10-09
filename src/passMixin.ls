@@ -6,7 +6,7 @@ timeout = 24 * 60 * 60 * 1000
 
 module.exports.pass-mixin =
   save-pass: has-store ->
-    local-storage.masterpass = JSON.stringify {pass: pass, time: +new Date}
+    local-storage.masterpass = JSON.stringify {pass: it, time: +new Date}
 
   clearPass: has-store ->
     delete local-storage.masterpass

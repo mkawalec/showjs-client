@@ -3,6 +3,7 @@ React    = require 'react/addons'
 
 {div} = React.DOM
 
+{Session-manager}    = require './SessionManager'
 {Position-indicator} = require './PositionIndicator'
 {helpers-mixin}      = require './helpersMixin'
 {pass-mixin}         = require './passMixin'
@@ -28,7 +29,15 @@ module.exports.ShowJS = React.create-class do
 
   render: ->
     cursor = Cursor.build @
+
     div className: \showjs,
+      Session-manager do
+        doc_id: @props.doc_id
+        socket: @props.socket
+        source: @props.source
+        indicator-cursor: cursor.refine \indicator
+        cursor: cursor.refine \session
+
       Position-indicator do
         visible:  cursor.refine \indicator, \visible
         position: cursor.refine \indicator, \position
