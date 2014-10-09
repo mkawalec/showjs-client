@@ -1,12 +1,16 @@
-
 {Cursor} = require 'react-cursor'
 React    = require 'react/addons'
 
 {div} = React.DOM
 
-{PositionIndicator} = require './PositionIndicator'
+{Position-indicator} = require './PositionIndicator'
+{helpers-mixin}      = require './helpersMixin'
+{pass-mixin}         = require './passMixin'
+
 
 module.exports.ShowJS = React.create-class do
+  mixins: [helpers-mixin, pass-mixin]
+
   getInitialState: ->
     indicator:
       visible: false
@@ -25,6 +29,6 @@ module.exports.ShowJS = React.create-class do
   render: ->
     cursor = Cursor.build @
     div className: \showjs,
-      PositionIndicator do
+      Position-indicator do
         visible:  cursor.refine \indicator, \visible
         position: cursor.refine \indicator, \position

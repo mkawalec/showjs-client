@@ -1,34 +1,33 @@
 {ShowJS} = require './ShowJS'
 React    = require 'react'
-{ThrottledSource} = require './ThrottledSource'
+{Throttled-source} = require './ThrottledSource'
 
 
 window.ShowJS = (doc_id, ^^opts ? {}) ->
   addNode = ->
     # Adds a node with a given class
-    wrapper = document.createElement 'div'
-    wrapper.className = it
-    document.querySelector \body .appendChild wrapper
+    wrapper = document.create-element 'div'
+    wrapper.class-name = it
+    document.query-selector \body .append-child wrapper
     wrapper
 
   mount = ->
-    console.log 'mount called'
     if not doc_id? then throw {type: 'MissingErr', msg: 'Doc id is missing'}
 
     opts.addr ?= 'https://showjs.io:443'
     if opts.debug is true then opts.addr = 'http://localhost:55555'
 
     # Init the wrapper and connection
-    wrapper = addNode 'showjs-wrapper'
+    wrapper = add-node 'showjs-wrapper'
     socket = io opts.addr
-    source = new ThrottledSource socket
+    source = new Throttled-source socket
 
-    React.renderComponent(
+    React.render-component(
       ShowJS {doc_id: doc_id, socket: socket, source: source}, null
       wrapper
     )
 
-  if document.querySelector 'body'
+  if document.query-selector 'body'
     mount!
   else
-    window.addEventListener 'DOMContentLoaded', mount
+    window.add-event-listener 'DOMContentLoaded', mount
