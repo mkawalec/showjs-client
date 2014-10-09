@@ -21,7 +21,7 @@ module.exports.ShowJS = React.create-class do
       stats: {}
       sync-position: {}
       visibility: false
-      passBox:
+      pass-box:
         input-visible: false
         pass-entered: false
         masterpass: undefined
