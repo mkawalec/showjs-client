@@ -44,7 +44,7 @@ module.exports.Session-manager = React.create-class do
     # Tells the other clients that they have to update
     # the currently displayed slide
     if @props.cursor.refine \passBox, \masterpass .value and \
-        @props.cursor.refine \sync .value
+        @props.cursor.refine \sync .pending-value!
       if it
         # If this function was fired by a change event, pull
         # the current coords from the event
