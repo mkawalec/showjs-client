@@ -18,14 +18,14 @@ module.exports.ShowJS = React.create-class do
       position: 0
 
     session:
-      id: 1
+      id: @get-id!
       stats: {}
       sync-position: {}
       visibility: false
       pass-box:
         input-visible: false
         pass-entered: false
-        masterpass: undefined
+        masterpass: @get-pass!
 
   render: ->
     cursor = Cursor.build @

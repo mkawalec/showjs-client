@@ -18,7 +18,7 @@ module.exports.ThrottledSource = (socket) ->
 
         throttle-store[event] =
           data: data
-          filfills: +new Date + throttle
+          fulfills: +new Date + throttle
           timeout: timeout
 
     watchers[event].push callback
@@ -42,7 +42,7 @@ module.exports.ThrottledSource = (socket) ->
       delete throttle-store[event]
     else
       throttle-store[event].timeout = \
-        setTimeout (!-> check-fulfillment event, throttle)
+        setTimeout (!-> check-fulfillment event, throttle), throttle
 
 
   @

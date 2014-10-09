@@ -65,7 +65,7 @@ module.exports.Session-manager = React.create-class do
       @props.socket.emit 'slide_change', payload
 
     # We want to check if we are still in sync after this change happened
-    @check-sync @props.cursor.refine \syncPosition .value
+    @check-sync(@props.cursor.refine \syncPosition .value)
 
   check-sync: (pos) ->
     {h, v} = Reveal.getIndices!
@@ -112,7 +112,7 @@ module.exports.Session-manager = React.create-class do
       data <~! @props.socket.emit 'check_pass', payload
       if data.valid == true
         @save-pass it
-        @props.cursor.refine \pass-box, \masterpass .set it
+        @props.cursor.refine \passBox, \masterpass .set it
         @props.cursor.refine \sync .set true
 
         if not @props.cursor.refine \sync .value
@@ -133,14 +133,14 @@ module.exports.Session-manager = React.create-class do
 
       {h, v} = Reveal.getIndices!
       sync-position = @props.cursor.refine \syncPosition .value
-      if not @props.cursor.refine \pass-box, \masterpass .value and \
+      if not @props.cursor.refine \passBox, \masterpass .value and \
           (h != sync-position.indexh or v != sync-position.indexv)
-        Reveal.slide sync.indexh, sync.indexv
+        Reveal.slide sync-position.indexh, sync-position.indexv
 
       @propagate-slide!
     else
       @props.cursor.refine \sync .set false
-      @props.cursor.refine \visible .set \true
+      @props.indicator-cursor.refine \visible .set \true
 
   render: ->
     visibility = @props.cursor.refine \visibility .value
