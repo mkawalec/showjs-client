@@ -65,9 +65,6 @@ module.exports.ShowJS = React.create-class do
       # When a comment is received
       comments <~! @props.socket.on 'comment'
       comments |> each @comment-added cursor, (comment) ->
-        # We don't want to double-add
-        if comment-added comment then return
-
         comments-store = cursor.refine \comments
         if not comments-store.refine comment.coords .pending-value!?
           comments-store.refine comment.coords .set []
