@@ -27,6 +27,7 @@ module.exports.ShowJS = React.create-class do
       stats: {}
       sync-position: {}
       visibility: false
+      current-slide: ''
       pass-box:
         input-visible: false
         pass-entered: false
@@ -90,3 +91,4 @@ module.exports.ShowJS = React.create-class do
 
       Comment-manager do
         cursor: cursor.refine \comments
+        current-slide: cursor.refine \session \currentSlide .value

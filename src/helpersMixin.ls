@@ -7,6 +7,11 @@ randchar = ->
   chars[idx]
 
 module.exports.helpersMixin =
+
+  get-slide-id: (slide) ->
+    # Returns the id of the slide
+    "#{slide.indexh};#{slide.indexv}"
+
   # Get the id, random selection of characters
   getId: -> [til 15] |> map randchar |> fold1 (+)
 

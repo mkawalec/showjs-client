@@ -28,18 +28,19 @@ module.exports.Session-manager = React.create-class do
     visibility.set !visibility.pendingValue!
 
   propagate-slide: ->
+    if it
+      # If this function was fired by a change event, pull
+      # the current coords from the event
+      slide = {indexh: it.indexh, indexv: it.indexv}
+    else
+      # Otherwise, determine the indices manually
+      {h, v} = Reveal.get-indices!
+      slide = {indexh: h, indexv: v}
+
     # Tells the other clients that they have to update
     # the currently displayed slide
     if @props.cursor.refine \passBox, \masterpass .value and \
         @props.cursor.refine \sync .pending-value!
-      if it
-        # If this function was fired by a change event, pull
-        # the current coords from the event
-        slide = {indexh: it.indexh, indexv: it.indexv}
-      else
-        # Otherwise, determine the indices manually
-        {h, v} = Reveal.get-indices!
-        slide = {indexh: h, indexv: v}
 
       # Get the position of the master indicator
       slide.indicator-pos = @indicator-pos!
@@ -50,6 +51,9 @@ module.exports.Session-manager = React.create-class do
         doc_id: @props.doc_id
 
       @props.socket.emit 'slide_change', payload
+
+    # Update the current slide
+    @props.cursor.refine \currentSlide .set @get-slide-id slide
 
     # We want to check if we are still in sync after this change happened
     @check-sync(@props.cursor.refine \syncPosition .value)
