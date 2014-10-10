@@ -7,6 +7,9 @@ React    = require 'react/addons'
 {Position-indicator} = require './PositionIndicator'
 {helpers-mixin}      = require './helpersMixin'
 {pass-mixin}         = require './passMixin'
+{Comment-manager}    = require './CommentManager'
+
+{flatten, map, each} = require 'prelude-ls'
 
 
 module.exports.ShowJS = React.create-class do
@@ -17,6 +20,8 @@ module.exports.ShowJS = React.create-class do
       visible: false
       position: 0
 
+    comments: {}
+
     session:
       id: @get-id!
       stats: {}
@@ -26,6 +31,16 @@ module.exports.ShowJS = React.create-class do
         input-visible: false
         pass-entered: false
         masterpass: @get-pass!
+
+  comment-added: (cursor, cb) ->
+    # Continues if the comment wasn't yet added
+    all-ids = cursor.refine \comments .pending-value!
+      |> map (-> it.id) |> map |> flatten
+
+    (comment) ->
+      if not elem-index comment.id, all-ids
+        cb comment
+
 
   component-will-mount: ->
     cursor = Cursor.build @
@@ -43,6 +58,21 @@ module.exports.ShowJS = React.create-class do
 
       cursor.refine \session \stats .set stats
 
+    do
+      # When a comment is received
+      comments <~! @props.socket.on 'comment'
+      comments |> each @comment-added cursor, (comment) ->
+        # We don't want to double-add
+        if comment-added comment then return
+
+        comments-store = cursor.refine \comments
+        if not comments-store.refine comment.coords .pending-value!?
+          comments-store.refine comment.coords .set []
+
+        if not comment.in_reply_to?
+          comments-store.refine comment.coords .pending-value!push comment
+
+
   render: ->
     cursor = Cursor.build @
 
@@ -57,3 +87,6 @@ module.exports.ShowJS = React.create-class do
       Position-indicator do
         visible:  cursor.refine \indicator, \visible
         position: cursor.refine \indicator, \position
+
+      Comment-manager do
+        cursor: cursor.refine \comments
