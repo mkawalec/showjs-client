@@ -18,19 +18,6 @@ module.exports.Session-manager = React.create-class do
   component-will-mount: ->
     document.add-event-listener 'dblclick', @toggle-visibility
 
-    do
-      # Join a correct room
-      <~! @props.socket.on 'connect'
-      @props.socket.emit 'join_room', {doc_id: @props.doc_id}
-
-    do
-      # React to stats received
-      stats <~! @props.socket.on 'stats'
-      if @props.cursor.refine \sync .value == undefined
-        @props.cursor.refine \sync .set true
-
-      @props.cursor.refine \stats .set stats
-
     # Just notify about the error
     @props.socket.on 'error_msg', @notify
     Reveal.add-event-listener 'slidechanged', @propagate-slide

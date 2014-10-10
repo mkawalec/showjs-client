@@ -27,6 +27,22 @@ module.exports.ShowJS = React.create-class do
         pass-entered: false
         masterpass: @get-pass!
 
+  component-will-mount: ->
+    cursor = Cursor.build @
+
+    do
+      # Join a correct room
+      <~! @props.socket.on 'connect'
+      @props.socket.emit 'join_room', {doc_id: @props.doc_id}
+
+    do
+      # React to stats received
+      stats <~! @props.socket.on 'stats'
+      if cursor.refine \session \sync .value == undefined
+        cursor.refine \session \sync .set true
+
+      cursor.refine \session \stats .set stats
+
   render: ->
     cursor = Cursor.build @
 
