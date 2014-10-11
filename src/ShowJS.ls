@@ -20,7 +20,10 @@ module.exports.ShowJS = React.create-class do
       visible: false
       position: 0
 
-    comments: {}
+    comments:
+      comments: {}
+      mouse-timeout: undefined
+      mouse-click-time: 2000
 
     session:
       id: @get-id!
@@ -35,13 +38,12 @@ module.exports.ShowJS = React.create-class do
 
   comment-added: (cursor, cb) ->
     # Continues if the comment wasn't yet added
-    all-ids = cursor.refine \comments .pending-value!
+    all-ids = cursor.refine \comments \comments .pending-value!
       |> map (-> it.id) |> map |> flatten
 
     (comment) ->
       if not elem-index comment.id, all-ids
         cb comment
-
 
   component-will-mount: ->
     cursor = Cursor.build @
@@ -63,7 +65,7 @@ module.exports.ShowJS = React.create-class do
       # When a comment is received
       comments <~! @props.socket.on 'comment'
       comments |> each @comment-added cursor, (comment) ->
-        comments-store = cursor.refine \comments
+        comments-store = cursor.refine \comments \comments
         if not comments-store.refine comment.coords .pending-value!?
           comments-store.refine comment.coords .set []
 

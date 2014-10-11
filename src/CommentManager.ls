@@ -5,9 +5,28 @@ React = require 'react/addons'
 {Comment} = require './Comment'
 
 module.exports.Comment-manager = React.create-class do
-  render: ->
-    comments = @props.cursor.refine @props.current-slide .value ? [] |> map ->
-      Comment {data: it}
+  click-start: ->
+    @props.cursor.refine \mouseTimeout .set do
+      set-timeout @add-comment, @props.cursor.refine(\mouseClickTime).value
 
-    div {class-name: 'comment-manager'}, comments
+  add-comment: ->
+    console.log 'adding commnet'
+
+  click-end: ->
+    timeout-value = @props.cursor.refine \mouseTimeout .pending-value!
+    if timeout-value?
+      clear-timeout timeout-value
+      @props.cursor.refine \mouseTimeout .set undefined
+
+  component-did-mount: ->
+    document.add-event-listener 'mouseup', @click-end
+
+  component-will-unmount: ->
+    document.remove-event-listener 'mouseup', @click-end
+
+  render: ->
+    comments = @props.cursor.refine \comments @props.current-slide .value ? []
+      |> map -> Comment {data: it}
+
+    div {class-name: 'showjs-comment-manager', on-mouse-down: @click-start}, comments
 
