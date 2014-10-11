@@ -38,8 +38,10 @@ module.exports.ShowJS = React.create-class do
 
   comment-added: (cursor, cb) ->
     # Continues if the comment wasn't yet added
-    all-ids = cursor.refine \comments \comments .pending-value!
-      |> map (-> it.id) |> map |> flatten
+    all-ids = cursor.refine \comments .pending-value!
+      |> map (-> it.id)
+      |> map
+      |> flatten
 
     (comment) ->
       if not elem-index comment.id, all-ids
