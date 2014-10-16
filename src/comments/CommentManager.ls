@@ -3,8 +3,12 @@ React = require 'react/addons'
 {map} = require 'prelude-ls'
 
 {Comment} = require './Comment'
+{ShowComment} = require './models'
+{store-mixin} = require './storeMixin'
 
 module.exports.Comment-manager = React.create-class do
+  mixins: [store-mixin]
+
   click-start: ->
     @props.cursor.refine \mouseTimeout .set do
       set-timeout @add-comment, @props.cursor.refine(\mouseClickTime).value

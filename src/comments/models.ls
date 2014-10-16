@@ -3,7 +3,7 @@
 ID = subtype Str, (s) -> s.length == 15
 
 module.exports = do
-  Comment: struct do
+  ShowComment: struct do
     authorID: ID
     slideID: Str
     body: Str
