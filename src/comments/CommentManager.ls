@@ -25,8 +25,5 @@ module.exports.Comment-manager = React.create-class do
     document.remove-event-listener 'mouseup', @click-end
 
   render: ->
-    comments = @props.cursor.refine \comments @props.current-slide .value ? []
-      |> map -> Comment {data: it}
-
-    div {class-name: 'showjs-comment-manager', on-mouse-down: @click-start}, comments
+    div {class-name: 'showjs-comment-manager', on-mouse-down: @click-start}
 

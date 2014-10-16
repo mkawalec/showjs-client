@@ -21,6 +21,7 @@
     "prelude-ls": "^1.1.1",
     "react": "^0.11.2",
     "react-addons": "^0.9.0",
-    "react-cursor": "^0.9.1"
+    "react-cursor": "^0.9.1",
+    "tcomb": "^0.2.1"
   }
 }

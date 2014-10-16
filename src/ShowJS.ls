@@ -7,7 +7,7 @@ React    = require 'react/addons'
 {Position-indicator} = require './PositionIndicator'
 {helpers-mixin}      = require './helpersMixin'
 {pass-mixin}         = require './passMixin'
-{Comment-manager}    = require './CommentManager'
+{Comment-manager}    = require './comments/CommentManager'
 
 {flatten, map, each} = require 'prelude-ls'
 
@@ -21,7 +21,7 @@ module.exports.ShowJS = React.create-class do
       position: 0
 
     comments:
-      comments: {}
+      comments: []
       mouse-timeout: undefined
       mouse-click-time: 2000
 
